@@ -2,7 +2,7 @@
 # One-time setup on the Pi. Run after the first publish has placed scripts/ under /opt/tapo-viewer.
 set -euo pipefail
 
-REMOTE_DIR=/opt/tapo-viewer
+REMOTE_DIR="$HOME/tapo-viewer"
 GO2RTC_VERSION=v1.9.4
 
 case "$(uname -m)" in
@@ -25,16 +25,20 @@ if ! command -v go2rtc >/dev/null 2>&1; then
   sudo chmod +x /usr/local/bin/go2rtc
 fi
 
-sudo mkdir -p "$REMOTE_DIR"
-sudo chown "$USER:$USER" "$REMOTE_DIR"
+mkdir -p "$REMOTE_DIR"
 
-echo "==> Installing systemd units"
-sudo cp "$REMOTE_DIR/scripts/go2rtc.service"     /etc/systemd/system/
-sudo cp "$REMOTE_DIR/scripts/tapo-server.service" /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable go2rtc tapo-server
+echo "==> Installing user-level systemd units"
+USER_UNIT_DIR="$HOME/.config/systemd/user"
+mkdir -p "$USER_UNIT_DIR"
+cp "$REMOTE_DIR/scripts/go2rtc.service"      "$USER_UNIT_DIR/"
+cp "$REMOTE_DIR/scripts/tapo-server.service" "$USER_UNIT_DIR/"
+systemctl --user daemon-reload
+systemctl --user enable go2rtc tapo-server
+
+echo "==> Enabling linger so services run at boot without login"
+sudo loginctl enable-linger "$USER"
 
 echo
 echo "==> Setup complete."
 echo "    Next: create $REMOTE_DIR/server/.env (copy from .env.example), edit $REMOTE_DIR/go2rtc.yaml,"
-echo "    then: sudo systemctl start go2rtc tapo-server"
+echo "    then: systemctl --user start go2rtc tapo-server"
