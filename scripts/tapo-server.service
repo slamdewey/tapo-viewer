@@ -1,0 +1,16 @@
+[Unit]
+Description=Tapo Viewer Node Server
+After=network-online.target go2rtc.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/opt/tapo-viewer/server
+EnvironmentFile=/opt/tapo-viewer/server/.env
+ExecStart=/usr/bin/node dist/index.js
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

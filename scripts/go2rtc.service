@@ -1,0 +1,15 @@
+[Unit]
+Description=go2rtc streaming server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/opt/tapo-viewer
+ExecStart=/usr/local/bin/go2rtc -config /opt/tapo-viewer/go2rtc.yaml
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
