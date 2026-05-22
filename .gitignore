@@ -2,6 +2,8 @@ node_modules/
 dist/
 .env
 deploy.env
+cameras.yaml
+tools/
 .claude/
 *.log
 .DS_Store

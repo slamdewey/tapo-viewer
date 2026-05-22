@@ -1,0 +1,14 @@
+# Camera definitions. Copy to cameras.yaml (gitignored) and fill in.
+# id: snake_case identifier; used as the key in URLs / API responses / go2rtc stream names
+# model: must exist in models.yaml
+# network: how the Node server reaches the camera (RTSP/ONVIF)
+
+cameras:
+  - id: eye_of_sauron
+    label: Eye of Sauron
+    model: tapo-c200
+    network:
+      ip: 192.168.0.88
+      user: saruman
+      pass: changeme
+      onvifPort: 2020

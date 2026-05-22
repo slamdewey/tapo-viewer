@@ -1,0 +1,60 @@
+.ptz {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.pad {
+  display: grid;
+  grid-template-columns: repeat(3, 56px);
+  grid-template-rows: repeat(3, 56px);
+  gap: 6px;
+
+  button {
+    background: #1f242b;
+    color: #e6e8eb;
+    border: 1px solid #2c323a;
+    border-radius: 8px;
+    font-size: 1.15rem;
+    cursor: pointer;
+    user-select: none;
+    touch-action: none;
+
+    &:hover {
+      background: #262c34;
+    }
+
+    &:active {
+      background: #313842;
+    }
+  }
+
+  .up    { grid-column: 2; grid-row: 1; }
+  .left  { grid-column: 1; grid-row: 2; }
+  .stop  { grid-column: 2; grid-row: 2; }
+  .right { grid-column: 3; grid-row: 2; }
+  .down  { grid-column: 2; grid-row: 3; }
+}
+
+.presets label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  color: #9aa3ad;
+  gap: 4px;
+
+  select {
+    background: #1f242b;
+    color: #e6e8eb;
+    border: 1px solid #2c323a;
+    border-radius: 6px;
+    padding: 4px 8px;
+    min-width: 180px;
+  }
+}
+
+.error {
+  color: #ff7a7a;
+  font-size: 0.85rem;
+}

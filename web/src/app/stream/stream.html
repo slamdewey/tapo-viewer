@@ -1,0 +1,20 @@
+<div class="stream">
+  @if (error()) {
+    <div class="overlay error">{{ error() }}</div>
+  } @else if (connecting()) {
+    <div class="overlay">connecting…</div>
+  } @else if (needsTap()) {
+    <button class="overlay tap" (click)="manualPlay()" type="button">▶ Tap to play</button>
+  }
+
+  @if (!error() && !connecting()) {
+    <button
+      class="audio-toggle"
+      type="button"
+      [title]="muted() ? 'Unmute' : 'Mute'"
+      (click)="toggleMute()"
+    >{{ muted() ? '🔇' : '🔊' }}</button>
+  }
+
+  <video #video appZoom autoplay playsinline muted></video>
+</div>

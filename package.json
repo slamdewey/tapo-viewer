@@ -1,0 +1,17 @@
+{
+  "name": "tapo-viewer",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n go2rtc,server,web -c green,cyan,magenta -k \"npm run dev:go2rtc\" \"npm --prefix server run dev\" \"npm --prefix web run start\"",
+    "dev:go2rtc": "node scripts/run-go2rtc.mjs",
+    "deploy": "node scripts/publish.mjs",
+    "deploy:skip-build": "node scripts/publish.mjs --skip-build",
+    "gen:go2rtc": "node scripts/gen-go2rtc.mjs"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

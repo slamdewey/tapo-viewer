@@ -1,0 +1,21 @@
+.placeholder {
+  padding: 2rem;
+  max-width: 540px;
+
+  h2 {
+    margin-top: 0;
+  }
+
+  p {
+    color: #9aa3ad;
+  }
+
+  a {
+    color: #6aa9ff;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

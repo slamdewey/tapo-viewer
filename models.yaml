@@ -1,0 +1,27 @@
+# Camera model registry. Each entry describes what a model can do and which
+# RTSP paths its qualities map to. Cameras in cameras.yaml reference these
+# entries by their key (e.g. "model: tapo-c200").
+
+tapo-c200:
+  capabilities:
+    ptz: true
+    presets: true
+    audio: true
+  qualities:
+    - quality: hd
+      label: HD 1080p
+      rtspPath: /stream1
+    - quality: sd
+      label: SD
+      rtspPath: /stream2
+
+# Fallback for any camera whose model isn't (yet) modeled here.
+generic:
+  capabilities:
+    ptz: false
+    presets: false
+    audio: false
+  qualities:
+    - quality: hd
+      label: Stream
+      rtspPath: /stream1

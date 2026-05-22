@@ -1,0 +1,25 @@
+<div class="ptz">
+  <div class="pad">
+    <button class="up"    (pointerdown)="onPointerDown($event, 'up')"    (pointerup)="onPointerUp()" (pointercancel)="onPointerUp()">▲</button>
+    <button class="left"  (pointerdown)="onPointerDown($event, 'left')"  (pointerup)="onPointerUp()" (pointercancel)="onPointerUp()">◀</button>
+    <button class="stop"  (click)="pressStop()">■</button>
+    <button class="right" (pointerdown)="onPointerDown($event, 'right')" (pointerup)="onPointerUp()" (pointercancel)="onPointerUp()">▶</button>
+    <button class="down"  (pointerdown)="onPointerDown($event, 'down')"  (pointerup)="onPointerUp()" (pointercancel)="onPointerUp()">▼</button>
+  </div>
+
+  <div class="presets">
+    <label>
+      Preset
+      <select [value]="selectedPreset()" (change)="onPresetChange($any($event.target).value)">
+        <option value="">—</option>
+        @for (p of presets(); track p.token) {
+          <option [value]="p.token">{{ p.name || p.token }}</option>
+        }
+      </select>
+    </label>
+  </div>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+</div>

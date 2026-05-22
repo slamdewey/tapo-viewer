@@ -1,0 +1,31 @@
+<section class="viewer">
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  } @else if (camera(); as cam) {
+    <header class="cam-header">
+      <h2>{{ cam.label }}</h2>
+      @if (hasMultipleQualities()) {
+        <label class="quality">
+          Quality
+          <select [value]="selectedStream()" (change)="onQualityChange($any($event.target).value)">
+            @for (s of cam.streams; track s.name) {
+              <option [value]="s.name">{{ s.label }}</option>
+            }
+          </select>
+        </label>
+      }
+    </header>
+
+    <div class="stream-wrap">
+      <app-stream [streamName]="selectedStream()" />
+    </div>
+
+    @if (hasPtz()) {
+      <div class="controls">
+        <app-ptz-pad [cameraId]="cam.id" />
+      </div>
+    }
+  } @else {
+    <div class="loading">Loading…</div>
+  }
+</section>

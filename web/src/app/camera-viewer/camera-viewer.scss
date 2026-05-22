@@ -1,0 +1,68 @@
+.viewer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.cam-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.15rem;
+  }
+}
+
+.quality {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #9aa3ad;
+
+  select {
+    background: #1f242b;
+    color: #e6e8eb;
+    border: 1px solid #2c323a;
+    border-radius: 6px;
+    padding: 2px 8px;
+  }
+}
+
+.stream-wrap {
+  max-width: 1280px;
+  width: 100%;
+}
+
+.controls {
+  display: flex;
+}
+
+.error {
+  color: #ff7a7a;
+}
+
+.loading {
+  color: #9aa3ad;
+}
+
+@media (min-width: 900px) {
+  .viewer {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .cam-header {
+    flex-basis: 100%;
+  }
+  .stream-wrap {
+    flex: 1;
+  }
+  .controls {
+    flex: 0 0 auto;
+  }
+}

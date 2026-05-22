@@ -2,7 +2,8 @@ import express from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { config } from './config.js';
+import { cameras, camerasById, config } from './config.js';
+import { toPublicCamera } from './cameras.js';
 import { move, gotoPreset, listPresets, type Direction } from './ptz.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -10,26 +11,36 @@ const app = express();
 
 app.use(express.json());
 
-app.post('/api/ptz/move', async (req, res) => {
+app.get('/api/cameras', (_req, res) => {
+  res.json(cameras.map(toPublicCamera));
+});
+
+app.get('/api/cameras/:id', (req, res) => {
+  const cam = camerasById.get(req.params.id);
+  if (!cam) return res.status(404).json({ error: 'not found' });
+  res.json(toPublicCamera(cam));
+});
+
+app.post('/api/cameras/:id/ptz/move', async (req, res) => {
   try {
-    await move(req.body.direction as Direction);
+    await move(req.params.id, req.body.direction as Direction);
     res.json({ ok: true });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
 });
 
-app.get('/api/ptz/presets', async (_req, res) => {
+app.get('/api/cameras/:id/ptz/presets', async (req, res) => {
   try {
-    res.json(await listPresets());
+    res.json(await listPresets(req.params.id));
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
 });
 
-app.post('/api/ptz/preset/:token', async (req, res) => {
+app.post('/api/cameras/:id/ptz/preset/:token', async (req, res) => {
   try {
-    await gotoPreset(req.params.token);
+    await gotoPreset(req.params.id, req.params.token);
     res.json({ ok: true });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -51,5 +62,7 @@ app.use(express.static(webDist));
 app.get('*', (_req, res) => res.sendFile(path.join(webDist, 'index.html')));
 
 app.listen(config.server.port, () => {
-  console.log(`Server listening on http://0.0.0.0:${config.server.port}`);
+  console.log(
+    `Server listening on http://0.0.0.0:${config.server.port}; loaded ${cameras.length} camera(s): ${cameras.map((c) => c.id).join(', ')}`,
+  );
 });
