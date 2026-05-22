@@ -1,45 +1,168 @@
+:host {
+  display: flex;
+  flex: 1;
+  align-self: stretch;
+  min-width: 0;
+}
+
 .viewer {
   flex: 1;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 1rem;
-  gap: 1rem;
+  min-width: 0;
 }
 
-.cam-header {
+.player {
+  position: relative;
+  width: 100%;
+  max-width: 1280px;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+
+  app-stream {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+
+  &.is-fullscreen {
+    max-width: none;
+    border-radius: 0;
+    width: 100vw;
+    height: 100vh;
+    aspect-ratio: auto;
+  }
+}
+
+%overlay-fade {
+  transition: opacity 0.28s ease;
+
+  &.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.overlay-top {
+  @extend %overlay-fade;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  padding: 0.85rem 1.1rem 2rem;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+  pointer-events: none;
 
-  h2 {
-    margin: 0;
-    font-size: 1.15rem;
+  .cam-name {
+    color: #e6e8eb;
+    font-size: 1.8rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    padding: 8px 18px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.55);
+  }
+}
+
+.overlay-ptz {
+  @extend %overlay-fade;
+  position: absolute;
+  right: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  padding: 0.6rem;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+}
+
+.overlay-controls {
+  @extend %overlay-fade;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 2rem 1.1rem 0.85rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+}
+
+.ctrl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 1.9rem;
+  line-height: 1;
+  padding: 12px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.75);
+  }
+
+  .ctrl-label {
+    font-size: 1.4rem;
+    letter-spacing: 0.02em;
+  }
+
+  .caret {
+    font-size: 1.2rem;
+    opacity: 0.85;
   }
 }
 
 .quality {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.85rem;
-  color: #9aa3ad;
+  position: relative;
 
-  select {
-    background: #1f242b;
-    color: #e6e8eb;
+  .menu {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    min-width: 100%;
+    background: rgba(15, 18, 22, 0.95);
     border: 1px solid #2c323a;
-    border-radius: 6px;
-    padding: 2px 8px;
+    border-radius: 8px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
+
+    li { display: block; }
+
+    button {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      color: #e6e8eb;
+      border: none;
+      padding: 10px 16px;
+      font-size: 1.4rem;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+
+      &:hover { background: #23272d; }
+      &.selected { color: #8cdaa3; }
+    }
   }
-}
-
-.stream-wrap {
-  max-width: 1280px;
-  width: 100%;
-}
-
-.controls {
-  display: flex;
 }
 
 .error {
@@ -50,19 +173,10 @@
   color: #9aa3ad;
 }
 
-@media (min-width: 900px) {
-  .viewer {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: flex-start;
-  }
-  .cam-header {
-    flex-basis: 100%;
-  }
-  .stream-wrap {
-    flex: 1;
-  }
-  .controls {
-    flex: 0 0 auto;
+@media (max-width: 600px) {
+  .overlay-ptz {
+    right: 0.4rem;
+    padding: 0.3rem;
+    transform: translateY(-55%);
   }
 }

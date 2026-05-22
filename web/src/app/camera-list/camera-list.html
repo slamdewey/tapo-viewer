@@ -4,7 +4,18 @@
   @if (error()) {
     <div class="error">{{ error() }}</div>
   } @else if (loading()) {
-    <div class="loading">Loading…</div>
+    <div class="grid">
+      @for (i of [0,1,2,3]; track i) {
+        <div class="card skeleton" aria-hidden="true">
+          <div class="thumb shimmer"></div>
+          <div class="meta">
+            <div class="line shimmer line-title"></div>
+            <div class="line shimmer line-sub"></div>
+            <div class="line shimmer line-badges"></div>
+          </div>
+        </div>
+      }
+    </div>
   } @else if (list().length === 0) {
     <div class="empty">No cameras configured</div>
   } @else {

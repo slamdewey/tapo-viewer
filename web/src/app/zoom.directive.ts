@@ -52,6 +52,7 @@ export class ZoomDirective {
     this.lastY = e.clientY;
     this.tx.update((v) => v + dx);
     this.ty.update((v) => v + dy);
+    this.clampTranslation();
     this.apply();
   }
 
@@ -112,8 +113,21 @@ export class ZoomDirective {
     if (clamped === this.minScale) {
       this.tx.set(0);
       this.ty.set(0);
+    } else {
+      this.clampTranslation();
     }
     this.apply();
+  }
+
+  private clampTranslation() {
+    const el = this.host.nativeElement;
+    const w = el.clientWidth;
+    const h = el.clientHeight;
+    const s = this.scale();
+    const maxX = (w * (s - 1)) / 2;
+    const maxY = (h * (s - 1)) / 2;
+    this.tx.update((v) => Math.max(-maxX, Math.min(maxX, v)));
+    this.ty.update((v) => Math.max(-maxY, Math.min(maxY, v)));
   }
 
   private apply() {

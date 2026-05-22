@@ -1,9 +1,12 @@
 import {
   Component,
   computed,
+  ElementRef,
+  HostListener,
   inject,
   OnInit,
   signal,
+  viewChild,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -26,12 +29,23 @@ export class CameraViewer implements OnInit {
     initialValue: this.route.snapshot.paramMap,
   });
 
+  playerRef = viewChild<ElementRef<HTMLElement>>('player');
+  streamRef = viewChild<Stream>('streamCmp');
+
   camera = signal<Camera | null>(null);
   selectedStream = signal<string>('');
   error = signal<string | null>(null);
+  isFullscreen = signal(false);
+  qualityMenuOpen = signal(false);
+  overlayVisible = signal(true);
 
   hasMultipleQualities = computed(() => (this.camera()?.streams.length ?? 0) > 1);
   hasPtz = computed(() => !!this.camera()?.capabilities.ptz);
+  selectedStreamLabel = computed(() => {
+    const cam = this.camera();
+    if (!cam) return '';
+    return cam.streams.find((s) => s.name === this.selectedStream())?.label ?? '';
+  });
 
   async ngOnInit() {
     try {
@@ -53,5 +67,40 @@ export class CameraViewer implements OnInit {
 
   onQualityChange(name: string) {
     this.selectedStream.set(name);
+    this.qualityMenuOpen.set(false);
+  }
+
+  toggleQualityMenu() {
+    this.qualityMenuOpen.update((v) => !v);
+  }
+
+  onPlayerClick(ev: MouseEvent) {
+    const target = ev.target as HTMLElement;
+    if (target.closest('.overlay-top, .overlay-ptz, .overlay-controls')) return;
+    this.overlayVisible.update((v) => !v);
+    if (!this.overlayVisible()) this.qualityMenuOpen.set(false);
+  }
+
+  toggleMute() {
+    this.streamRef()?.toggleMute();
+  }
+
+  muted() {
+    return this.streamRef()?.muted() ?? false;
+  }
+
+  async toggleFullscreen() {
+    const el = this.playerRef()?.nativeElement;
+    if (!el) return;
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    } else {
+      await el.requestFullscreen();
+    }
+  }
+
+  @HostListener('document:fullscreenchange')
+  onFullscreenChange() {
+    this.isFullscreen.set(!!document.fullscreenElement);
   }
 }

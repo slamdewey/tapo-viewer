@@ -2,29 +2,65 @@
   @if (error()) {
     <div class="error">{{ error() }}</div>
   } @else if (camera(); as cam) {
-    <header class="cam-header">
-      <h2>{{ cam.label }}</h2>
-      @if (hasMultipleQualities()) {
-        <label class="quality">
-          Quality
-          <select [value]="selectedStream()" (change)="onQualityChange($any($event.target).value)">
-            @for (s of cam.streams; track s.name) {
-              <option [value]="s.name">{{ s.label }}</option>
-            }
-          </select>
-        </label>
-      }
-    </header>
+    <div #player class="player" [class.is-fullscreen]="isFullscreen()" (click)="onPlayerClick($event)">
+      <app-stream #streamCmp [streamName]="selectedStream()" />
 
-    <div class="stream-wrap">
-      <app-stream [streamName]="selectedStream()" />
-    </div>
-
-    @if (hasPtz()) {
-      <div class="controls">
-        <app-ptz-pad [cameraId]="cam.id" />
+      <div class="overlay-top" [class.hidden]="!overlayVisible()">
+        <span class="cam-name">{{ cam.label }}</span>
       </div>
-    }
+
+      @if (hasPtz()) {
+        <div class="overlay-ptz" [class.hidden]="!overlayVisible()">
+          <app-ptz-pad [cameraId]="cam.id" />
+        </div>
+      }
+
+      <div class="overlay-controls" [class.hidden]="!overlayVisible()">
+        @if (hasMultipleQualities()) {
+          <div class="control quality" [class.open]="qualityMenuOpen()">
+            <button
+              type="button"
+              class="ctrl-btn"
+              (click)="toggleQualityMenu()"
+              [attr.aria-expanded]="qualityMenuOpen()"
+              title="Quality"
+            >
+              <span class="ctrl-label">{{ selectedStreamLabel() }}</span>
+              <span class="caret">▾</span>
+            </button>
+            @if (qualityMenuOpen()) {
+              <ul class="menu" role="listbox">
+                @for (s of cam.streams; track s.name) {
+                  <li>
+                    <button
+                      type="button"
+                      role="option"
+                      [attr.aria-selected]="s.name === selectedStream()"
+                      [class.selected]="s.name === selectedStream()"
+                      (click)="onQualityChange(s.name)"
+                    >{{ s.label }}</button>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        }
+
+        <button
+          type="button"
+          class="ctrl-btn"
+          (click)="toggleMute()"
+          [title]="muted() ? 'Unmute' : 'Mute'"
+        >{{ muted() ? '🔇' : '🔊' }}</button>
+
+        <button
+          type="button"
+          class="ctrl-btn"
+          (click)="toggleFullscreen()"
+          [title]="isFullscreen() ? 'Exit fullscreen' : 'Fullscreen'"
+        >{{ isFullscreen() ? '⤓' : '⛶' }}</button>
+      </div>
+    </div>
   } @else {
     <div class="loading">Loading…</div>
   }

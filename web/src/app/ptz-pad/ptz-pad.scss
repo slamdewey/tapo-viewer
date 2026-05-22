@@ -1,32 +1,32 @@
 .ptz {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 1rem;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .pad {
   display: grid;
-  grid-template-columns: repeat(3, 56px);
-  grid-template-rows: repeat(3, 56px);
+  grid-template-columns: repeat(3, 76px);
+  grid-template-rows: repeat(3, 76px);
   gap: 6px;
 
   button {
-    background: #1f242b;
+    background: rgba(31, 36, 43, 0.85);
     color: #e6e8eb;
-    border: 1px solid #2c323a;
-    border-radius: 8px;
-    font-size: 1.15rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    font-size: 1.8rem;
     cursor: pointer;
     user-select: none;
     touch-action: none;
 
     &:hover {
-      background: #262c34;
+      background: rgba(38, 44, 52, 0.95);
     }
 
     &:active {
-      background: #313842;
+      background: rgba(49, 56, 66, 0.95);
     }
   }
 
@@ -40,4 +40,6 @@
 .error {
   color: #ff7a7a;
   font-size: 0.85rem;
+  max-width: 220px;
+  text-align: center;
 }
