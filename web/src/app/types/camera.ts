@@ -2,7 +2,6 @@ export type CameraQuality = 'hd' | 'sd';
 
 export interface CameraCapabilities {
   ptz: boolean;
-  presets: boolean;
   audio: boolean;
 }
 

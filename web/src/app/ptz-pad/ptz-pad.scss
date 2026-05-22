@@ -37,23 +37,6 @@
   .down  { grid-column: 2; grid-row: 3; }
 }
 
-.presets label {
-  display: flex;
-  flex-direction: column;
-  font-size: 0.85rem;
-  color: #9aa3ad;
-  gap: 4px;
-
-  select {
-    background: #1f242b;
-    color: #e6e8eb;
-    border: 1px solid #2c323a;
-    border-radius: 6px;
-    padding: 4px 8px;
-    min-width: 180px;
-  }
-}
-
 .error {
   color: #ff7a7a;
   font-size: 0.85rem;

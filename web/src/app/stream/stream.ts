@@ -27,7 +27,7 @@ export class Stream implements OnDestroy {
   error = signal<string | null>(null);
   connecting = signal(true);
   needsTap = signal(false);
-  muted = signal(true);
+  muted = signal(false);
 
   private connection: Go2rtcConnection | null = null;
 
@@ -65,12 +65,24 @@ export class Stream implements OnDestroy {
   }
 
   async tryPlay() {
+    const v = this.videoRef().nativeElement;
     try {
-      await this.videoRef().nativeElement.play();
+      await v.play();
       this.needsTap.set(false);
-    } catch {
-      this.needsTap.set(true);
+      return;
+    } catch {}
+    // First attempt failed. If we were trying unmuted, fall back to muted —
+    // most browsers will autoplay a muted video without a gesture.
+    if (!v.muted) {
+      v.muted = true;
+      this.muted.set(true);
+      try {
+        await v.play();
+        this.needsTap.set(false);
+        return;
+      } catch {}
     }
+    this.needsTap.set(true);
   }
 
   manualPlay() {

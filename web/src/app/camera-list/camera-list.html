@@ -1,5 +1,41 @@
-<section class="placeholder">
+<section class="camera-list">
   <h2>Cameras</h2>
-  <p>Multi-camera support is on the backlog. For now there is only one stream.</p>
-  <a routerLink="/">Back to live view</a>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  } @else if (loading()) {
+    <div class="loading">Loading…</div>
+  } @else if (list().length === 0) {
+    <div class="empty">No cameras configured</div>
+  } @else {
+    <div class="grid">
+      @for (cam of list(); track cam.id) {
+        <a class="card" [routerLink]="['/cam', cam.id]">
+          <div class="thumb">
+            @if (hasThumbError(cam.id)) {
+              <div class="thumb-placeholder">{{ cam.label }}</div>
+            } @else {
+              <img
+                [src]="thumbnailUrl(cam)"
+                [alt]="cam.label"
+                (error)="onThumbError(cam.id)"
+                loading="lazy"
+              />
+            }
+          </div>
+          <div class="meta">
+            <h3>{{ cam.label }}</h3>
+            <span class="model">{{ cam.model }}</span>
+            <div class="badges">
+              @if (cam.capabilities.ptz)   { <span class="badge ptz">PTZ</span> }
+              @if (cam.capabilities.audio) { <span class="badge audio">audio</span> }
+              @for (s of cam.streams; track s.name) {
+                <span class="badge quality-{{ s.quality }}">{{ s.label }}</span>
+              }
+            </div>
+          </div>
+        </a>
+      }
+    </div>
+  }
 </section>

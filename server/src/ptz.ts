@@ -63,21 +63,3 @@ export async function move(id: string, direction: Direction): Promise<void> {
   );
 }
 
-export async function gotoPreset(id: string, token: string): Promise<void> {
-  const cam = await getCam(id);
-  await new Promise<void>((res, rej) =>
-    cam.gotoPreset({ preset: token }, (e: Error | null) => (e ? rej(e) : res())),
-  );
-}
-
-export async function listPresets(
-  id: string,
-): Promise<Array<{ name: string; token: string }>> {
-  const cam = await getCam(id);
-  return new Promise((res, rej) =>
-    cam.getPresets((err: Error | null, presets: Record<string, string>) => {
-      if (err) return rej(err);
-      res(Object.entries(presets).map(([name, token]) => ({ name, token })));
-    }),
-  );
-}

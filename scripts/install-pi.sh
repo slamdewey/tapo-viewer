@@ -18,6 +18,11 @@ if ! command -v node >/dev/null 2>&1; then
   sudo apt-get install -y nodejs
 fi
 
+if ! command -v ffmpeg >/dev/null 2>&1; then
+  echo "==> Installing ffmpeg (required for go2rtc snapshot frames)"
+  sudo apt-get install -y ffmpeg
+fi
+
 if ! command -v go2rtc >/dev/null 2>&1; then
   echo "==> Installing go2rtc $GO2RTC_VERSION ($GO2RTC_ARCH)"
   sudo curl -fsSL -o /usr/local/bin/go2rtc \

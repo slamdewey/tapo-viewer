@@ -4,12 +4,21 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cameras, camerasById, config } from './config.js';
 import { toPublicCamera } from './cameras.js';
-import { move, gotoPreset, listPresets, type Direction } from './ptz.js';
+import { move, type Direction } from './ptz.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
 app.use(express.json());
+
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const ms = Date.now() - start;
+    console.log(`${req.method} ${req.originalUrl} → ${res.statusCode} (${ms}ms)`);
+  });
+  next();
+});
 
 app.get('/api/cameras', (_req, res) => {
   res.json(cameras.map(toPublicCamera));
@@ -24,23 +33,6 @@ app.get('/api/cameras/:id', (req, res) => {
 app.post('/api/cameras/:id/ptz/move', async (req, res) => {
   try {
     await move(req.params.id, req.body.direction as Direction);
-    res.json({ ok: true });
-  } catch (e: any) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
-app.get('/api/cameras/:id/ptz/presets', async (req, res) => {
-  try {
-    res.json(await listPresets(req.params.id));
-  } catch (e: any) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
-app.post('/api/cameras/:id/ptz/preset/:token', async (req, res) => {
-  try {
-    await gotoPreset(req.params.id, req.params.token);
     res.json({ ok: true });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
