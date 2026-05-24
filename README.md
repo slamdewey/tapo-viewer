@@ -8,6 +8,23 @@ web app for live viewing and PTZ. Tested with TP-Link Tapo C200.
 Built for a single household: a few cameras, a few devices, accessed on the
 LAN or via whatever VPN you already use.
 
+## Contents
+
+- [Architecture](#architecture)
+- [Repo layout](#repo-layout)
+- [Prerequisites](#prerequisites)
+- [Quick start](#quick-start)
+- [Configuring cameras](#configuring-cameras)
+- [Local development](#local-development)
+- [Deploy](#deploy)
+- [Remote access](#remote-access)
+- [DNS](#dns)
+- [Troubleshooting](#troubleshooting)
+  - [DNS doesn't resolve](#dns-doesnt-resolve)
+  - [WebRTC stream times out](#webrtc-stream-times-out)
+  - [Site loads but stream is a black square (audio works)](#site-loads-but-stream-is-a-black-square-audio-works)
+- [Known issues](#known-issues)
+
 ## Architecture
 
 ```mermaid
@@ -22,22 +39,27 @@ flowchart LR
             caddy["Caddy<br/>:80"]
         end
         subgraph app["app"]
-            node["scry-server<br/>:8080"]
+            node["scry-server<br/>:8080<br/>Angular bundle + /api/*"]
             go2rtc["go2rtc<br/>:1984 + :8555/udp"]
         end
     end
 
-    client -->|http| caddy
+    client <-->|http| caddy
     client -->|dns| dns
-    caddy -->|reverse proxy| node
+    caddy <-->|reverse proxy| node
     node -->|/stream/*| go2rtc
     node -->|ONVIF PTZ| cams
     go2rtc -->|RTSP| cams
     go2rtc -.->|WebRTC :8555| client
 ```
 
-Solid arrows are request/response. Dotted is media — WebRTC over UDP 8555
-flows directly from go2rtc to the browser, bypassing everything else.
+The browser hits Caddy on :80, which reverse-proxies to `scry-server` on
+:8080. `scry-server` serves the prebuilt Angular bundle (HTML/JS/CSS from
+`web/dist/scry-web/browser/`) as static files, and the `/api/*` and
+`/stream/*` routes alongside. The Angular client then makes the WebRTC
+handshake via `/stream/api/webrtc` (proxied to go2rtc) and media flows
+directly from go2rtc to the browser over UDP 8555 — the dotted arrow,
+bypassing the rest of the stack.
 
 Two user-mode systemd services hold the app code:
 
