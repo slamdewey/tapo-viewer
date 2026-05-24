@@ -10,24 +10,44 @@ LAN or while travelling.
 
 ## Architecture
 
+```mermaid
+flowchart LR
+    cams[Tapo cameras]
+    lan[LAN browser]
+    peer[WG peer<br/>phone, laptop]
+
+    subgraph pi["Pi · wormhole"]
+        direction TB
+        subgraph edge["edge"]
+            wg["WireGuard<br/>:51820/udp"]
+            dns["dnsmasq<br/>:53"]
+            caddy["Caddy<br/>:80"]
+        end
+        subgraph app["app"]
+            node["tapo-server<br/>:8080"]
+            go2rtc["go2rtc<br/>:1984 + :8555/udp"]
+        end
+    end
+
+    lan -->|http| caddy
+    peer ==>|wg tunnel| wg
+    wg --> caddy
+    lan -->|dns| dns
+    peer -.->|dns via tunnel| dns
+
+    caddy -->|reverse proxy| node
+    node -->|/stream/*| go2rtc
+    node -->|ONVIF PTZ| cams
+    go2rtc -->|RTSP| cams
+    go2rtc -.->|WebRTC :8555| lan
+    go2rtc -.->|WebRTC :8555| peer
 ```
-            +----------------- Pi (wormhole) -----------------+
-            |                                                 |
-[Tapo cam] -+-RTSP-> [go2rtc] --WebRTC (UDP 8555)--+          |
-            |           ^                          |          |
-            |     /stream/* proxy                  |          |
-            |           |                          v          |
-            |        [Node/Express :8080] <-------/           |
-            |          ^      |                               |
-            |          |      +-- ONVIF PTZ ------> [Tapo cam]|
-            |          |                                      |
-            |     [Pi-hole :53]   [WireGuard :51820/udp]      |
-            |                                                 |
-            +-------------------------------------------------+
-                  ^                            ^
-                  |                            |
-            LAN browser                  WG peer (phone, laptop)
-```
+
+Reading the diagram: solid arrows are direct request/response paths; dotted
+arrows are media (WebRTC over UDP 8555 flows directly from go2rtc to the
+browser, bypassing the rest of the stack). The thick `==>` is the encrypted
+WireGuard tunnel — once a peer's traffic hits the Pi it's just normal LAN
+packets again.
 
 Two user-mode systemd services hold the app code:
 
