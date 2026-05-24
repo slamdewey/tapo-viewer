@@ -23,21 +23,17 @@ if (!cameras?.cameras?.length) {
 // local interfaces. In prod, advertise the Pi's hostname so remote browsers
 // can establish WebRTC.
 let publicHost = 'raspberrypi.local';
-let wgHost = null;
 if (!isDev) {
   try {
     const env = readFileSync(resolve(ROOT, 'deploy.env'), 'utf8');
     const m = env.match(/^\s*PiHost\s*=\s*(\S+)/m);
     if (m) publicHost = m[1].trim();
-    const w = env.match(/^\s*PiWgHost\s*=\s*(\S+)/m);
-    if (w) wgHost = w[1].trim();
   } catch {
     // no deploy.env, use default
   }
 }
 
 const candidates = [`${publicHost}:8555`];
-if (wgHost) candidates.push(`${wgHost}:8555`);
 
 const streams = {};
 const seen = new Set();

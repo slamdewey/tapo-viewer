@@ -192,9 +192,6 @@ VPN connected, every URL in this README works the same as on LAN.
 Two practical bits worth knowing if you do this:
 - **Set the VPN client's DNS to the Pi's LAN IP** so `scry` resolves through
   dnsmasq while the tunnel is up.
-- **Add the Pi's VPN-side IP** to `PiWgHost` in `deploy.env` if your VPN
-  client lives on a separate subnet — go2rtc advertises it as an extra
-  WebRTC candidate so media has a routable target.
 
 ## DNS
 
@@ -235,9 +232,6 @@ extra setup), set your router's DHCP DNS to the Pi's LAN IP.
   timeout. The web service caps ICE gathering at 2.5s; the timer is in
   [`web/src/app/services/go2rtc-webrtc.service.ts`](web/src/app/services/go2rtc-webrtc.service.ts)
   if it ever needs raising.
-- Over a VPN, confirm `go2rtc.yaml` on the Pi has the VPN-side host in
-  `candidates` (`PiWgHost` in `deploy.env`). Otherwise media has no
-  routable target from the VPN.
 
 ### Site loads but stream is a black square (audio works)
 
