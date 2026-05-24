@@ -22,7 +22,7 @@ if (!cameras?.cameras?.length) {
 // In dev, go2rtc runs on the same machine as the browser — let it auto-detect
 // local interfaces. In prod, advertise the Pi's hostname so remote browsers
 // can establish WebRTC.
-let publicHost = 'wormhole.local';
+let publicHost = 'raspberrypi.local';
 let wgHost = null;
 if (!isDev) {
   try {
@@ -54,7 +54,11 @@ for (const cam of cameras.cameras) {
 
 const out = {
   streams,
-  api: { listen: ':1984', origin: '*' },
+  // Bind the admin API to localhost only — it's a sensitive surface (returns
+  // RTSP URLs with embedded creds via /api/streams). The Node server proxies
+  // the specific endpoints clients actually need; nobody else on the LAN
+  // should be able to hit go2rtc directly.
+  api: { listen: '127.0.0.1:1984', origin: '*' },
   webrtc: isDev
     ? { listen: ':8555' }
     : { listen: ':8555', candidates },

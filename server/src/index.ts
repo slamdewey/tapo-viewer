@@ -39,15 +39,23 @@ app.post('/api/cameras/:id/ptz/move', async (req, res) => {
   }
 });
 
-app.use(
-  '/stream',
-  createProxyMiddleware({
-    target: config.go2rtcUrl,
-    changeOrigin: true,
-    ws: true,
-    pathRewrite: { '^/stream': '' },
-  }),
-);
+// Only proxy the go2rtc endpoints the client actually uses. The catch-all
+// proxy we used to have also forwarded /stream/api/streams, which returns the
+// camera RTSP URLs with embedded credentials — a credential leak to anyone
+// who could reach :8080. Everything not on this allow-list returns 404.
+const ALLOWED_GO2RTC_PATHS = new Set(['/api/webrtc', '/api/frame.jpeg']);
+const go2rtcProxy = createProxyMiddleware({
+  target: config.go2rtcUrl,
+  changeOrigin: true,
+  ws: true,
+  pathRewrite: { '^/stream': '' },
+});
+app.use('/stream', (req, res, next) => {
+  if (!ALLOWED_GO2RTC_PATHS.has(req.path)) {
+    return res.status(404).end();
+  }
+  return go2rtcProxy(req, res, next);
+});
 
 const webDist = path.resolve(__dirname, '..', config.webDist);
 app.use(express.static(webDist));

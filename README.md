@@ -247,11 +247,6 @@ on the routed component.
 
 ## Known issues
 
-- **`/api/streams` leaks RTSP credentials.** Both go2rtc directly and the
-  proxied path return camera RTSP URLs with username/password embedded.
-  Anyone reaching `:1984` or `:8080` can read the camera password. Don't
-  expose either publicly until this is fixed; on a private network it's
-  only as bad as the trust on that network.
 - **`.local` names don't traverse VPNs.** mDNS doesn't cross routing
   boundaries. Use the bare names (resolved by dnsmasq) or an IP directly
   when off-LAN.
