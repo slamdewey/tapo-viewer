@@ -14,6 +14,10 @@ export class Go2rtcWebrtcService {
     pc.addTransceiver('video', { direction: 'recvonly' });
     pc.addTransceiver('audio', { direction: 'recvonly' });
 
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    await waitForIceGathering(pc, 2500);
+
     const trackPromise = new Promise<MediaStream>((resolve, reject) => {
       const timeout = setTimeout(
         () => reject(new Error('Timed out waiting for media tracks')),
@@ -26,10 +30,6 @@ export class Go2rtcWebrtcService {
         }
       };
     });
-
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    await waitForIceGathering(pc);
 
     const resp = await fetch(
       `/stream/api/webrtc?src=${encodeURIComponent(streamName)}`,
@@ -59,15 +59,18 @@ export class Go2rtcWebrtcService {
   }
 }
 
-function waitForIceGathering(pc: RTCPeerConnection): Promise<void> {
+function waitForIceGathering(pc: RTCPeerConnection, maxMs: number): Promise<void> {
   if (pc.iceGatheringState === 'complete') return Promise.resolve();
   return new Promise((resolve) => {
+    const finish = () => {
+      pc.removeEventListener('icegatheringstatechange', onChange);
+      clearTimeout(timer);
+      resolve();
+    };
     const onChange = () => {
-      if (pc.iceGatheringState === 'complete') {
-        pc.removeEventListener('icegatheringstatechange', onChange);
-        resolve();
-      }
+      if (pc.iceGatheringState === 'complete') finish();
     };
     pc.addEventListener('icegatheringstatechange', onChange);
+    const timer = setTimeout(finish, maxMs);
   });
 }

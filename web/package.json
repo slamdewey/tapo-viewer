@@ -1,5 +1,5 @@
 {
-  "name": "tapo-viewer-web",
+  "name": "scry-web",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",

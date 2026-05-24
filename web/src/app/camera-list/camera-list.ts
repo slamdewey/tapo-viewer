@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 import { CameraService } from '../services/camera.service';
 import { Camera } from '../types/camera';
 
@@ -11,6 +12,7 @@ import { Camera } from '../types/camera';
 })
 export class CameraList implements OnInit {
   private cameras = inject(CameraService);
+  private titleService = inject(Title);
 
   list = signal<Camera[]>([]);
   loading = signal(true);
@@ -18,6 +20,7 @@ export class CameraList implements OnInit {
   thumbErrors = signal<Set<string>>(new Set());
 
   async ngOnInit() {
+    this.titleService.setTitle('Cameras · scry');
     try {
       this.list.set(await this.cameras.list());
     } catch (e: any) {

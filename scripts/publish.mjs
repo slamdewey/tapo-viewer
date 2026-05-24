@@ -123,11 +123,19 @@ try {
   ]);
   run('scp', [resolve(ROOT, 'scripts/go2rtc.service'), `${target}:${remoteDir}/scripts/`]);
   run('scp', [resolve(ROOT, 'scripts/install-pi.sh'), `${target}:${remoteDir}/scripts/`]);
+  run('scp', [
+    resolve(ROOT, 'scripts/dnsmasq.scry.conf'),
+    `${target}:${remoteDir}/scripts/`,
+  ]);
+  run('scp', [resolve(ROOT, 'scripts/Caddyfile'), `${target}:${remoteDir}/scripts/`]);
 
   step('Installing server prod deps on Pi');
   run('ssh', [target, `cd ${remoteDir}/server && npm ci --omit=dev`]);
 
-  step('Restarting services');
+  step('Running install-pi.sh (idempotent system setup)');
+  run('ssh', ['-t', target, `bash ${remoteDir}/scripts/install-pi.sh`]);
+
+  step('Restarting user services');
   run('ssh', [target, 'systemctl --user restart go2rtc tapo-server']);
 
   step(`Done. http://${piHost}:8080`);

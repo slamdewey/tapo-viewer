@@ -1,0 +1,21 @@
+# Installed by scripts/install-pi.sh to /etc/caddy/Caddyfile.
+#
+# All HTTP traffic on :80 reverse-proxies to the Node tapo-server on :8080,
+# regardless of Host header. That covers `scry`, `wormhole`, raw-IP access,
+# and anything else that lands here.
+#
+# When you want HTTPS, replace the `:80` block with a site block keyed on a
+# real FQDN, e.g.:
+#
+#   cam.example.com {
+#       reverse_proxy localhost:8080
+#       tls {
+#           dns cloudflare {env.CF_API_TOKEN}
+#       }
+#   }
+#
+# Caddy will fetch and renew a Let's Encrypt cert via DNS-01 automatically.
+
+:80 {
+    reverse_proxy localhost:8080
+}

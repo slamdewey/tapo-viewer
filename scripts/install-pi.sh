@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# One-time setup on the Pi. Run after the first publish has placed scripts/ under /opt/tapo-viewer.
+# Idempotent system-side setup. Safe to re-run on every deploy; only does work
+# when something actually changed.
 set -euo pipefail
 
 REMOTE_DIR="$HOME/tapo-viewer"
@@ -32,18 +33,80 @@ fi
 
 mkdir -p "$REMOTE_DIR"
 
-echo "==> Installing user-level systemd units"
+if command -v pihole >/dev/null 2>&1; then
+  echo "!! Pi-hole is still installed. dnsmasq and Caddy both want ports that"
+  echo "   Pi-hole occupies (53, 80). Run 'sudo pihole uninstall' first, then"
+  echo "   re-run this script."
+  exit 1
+fi
+
+# --- dnsmasq ------------------------------------------------------------------
+if ! dpkg -s dnsmasq >/dev/null 2>&1; then
+  echo "==> Installing dnsmasq"
+  sudo apt-get update
+  sudo apt-get install -y dnsmasq
+fi
+
+DNSMASQ_SRC="$REMOTE_DIR/scripts/dnsmasq.scry.conf"
+DNSMASQ_DST=/etc/dnsmasq.d/scry.conf
+DNSMASQ_CHANGED=0
+if [ -f "$DNSMASQ_SRC" ] && ! sudo cmp -s "$DNSMASQ_SRC" "$DNSMASQ_DST" 2>/dev/null; then
+  echo "==> Updating $DNSMASQ_DST"
+  sudo cp "$DNSMASQ_SRC" "$DNSMASQ_DST"
+  DNSMASQ_CHANGED=1
+fi
+if ! systemctl is-enabled --quiet dnsmasq; then
+  sudo systemctl enable dnsmasq >/dev/null
+fi
+if [ "$DNSMASQ_CHANGED" = "1" ] || ! systemctl is-active --quiet dnsmasq; then
+  sudo systemctl restart dnsmasq
+fi
+
+# --- Caddy --------------------------------------------------------------------
+if ! command -v caddy >/dev/null 2>&1; then
+  echo "==> Installing Caddy"
+  sudo apt-get install -y debian-keyring debian-archive-keyring apt-transport-https curl gpg
+  curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' \
+    | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+  curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' \
+    | sudo tee /etc/apt/sources.list.d/caddy-stable.list >/dev/null
+  sudo apt-get update
+  sudo apt-get install -y caddy
+fi
+
+CADDY_SRC="$REMOTE_DIR/scripts/Caddyfile"
+CADDY_DST=/etc/caddy/Caddyfile
+CADDY_CHANGED=0
+if [ -f "$CADDY_SRC" ] && ! sudo cmp -s "$CADDY_SRC" "$CADDY_DST" 2>/dev/null; then
+  echo "==> Updating $CADDY_DST"
+  sudo cp "$CADDY_SRC" "$CADDY_DST"
+  CADDY_CHANGED=1
+fi
+if ! systemctl is-enabled --quiet caddy; then
+  sudo systemctl enable caddy >/dev/null
+fi
+if [ "$CADDY_CHANGED" = "1" ] || ! systemctl is-active --quiet caddy; then
+  sudo systemctl restart caddy
+fi
+
+# --- User-level systemd units -------------------------------------------------
 USER_UNIT_DIR="$HOME/.config/systemd/user"
 mkdir -p "$USER_UNIT_DIR"
-cp "$REMOTE_DIR/scripts/go2rtc.service"      "$USER_UNIT_DIR/"
-cp "$REMOTE_DIR/scripts/tapo-server.service" "$USER_UNIT_DIR/"
-systemctl --user daemon-reload
-systemctl --user enable go2rtc tapo-server
+UNITS_CHANGED=0
+for unit in go2rtc.service tapo-server.service; do
+  if ! cmp -s "$REMOTE_DIR/scripts/$unit" "$USER_UNIT_DIR/$unit" 2>/dev/null; then
+    echo "==> Updating user unit $unit"
+    cp "$REMOTE_DIR/scripts/$unit" "$USER_UNIT_DIR/$unit"
+    UNITS_CHANGED=1
+  fi
+done
+if [ "$UNITS_CHANGED" = "1" ]; then
+  systemctl --user daemon-reload
+fi
+systemctl --user enable go2rtc tapo-server >/dev/null 2>&1 || true
 
-echo "==> Enabling linger so services run at boot without login"
-sudo loginctl enable-linger "$USER"
-
-echo
-echo "==> Setup complete."
-echo "    Next: create $REMOTE_DIR/server/.env (copy from .env.example), edit $REMOTE_DIR/go2rtc.yaml,"
-echo "    then: systemctl --user start go2rtc tapo-server"
+# --- Boot-time linger ---------------------------------------------------------
+if ! loginctl show-user "$USER" --property=Linger 2>/dev/null | grep -q "Linger=yes"; then
+  echo "==> Enabling linger so user services start at boot"
+  sudo loginctl enable-linger "$USER"
+fi

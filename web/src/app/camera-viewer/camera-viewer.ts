@@ -9,6 +9,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Stream } from '../stream/stream';
 import { PtzPad } from '../ptz-pad/ptz-pad';
@@ -24,6 +25,7 @@ import { Camera } from '../types/camera';
 export class CameraViewer implements OnInit {
   private route = inject(ActivatedRoute);
   private cameras = inject(CameraService);
+  private titleService = inject(Title);
 
   private params = toSignal(this.route.paramMap, {
     initialValue: this.route.snapshot.paramMap,
@@ -60,6 +62,7 @@ export class CameraViewer implements OnInit {
         : list[0];
       this.camera.set(cam);
       this.selectedStream.set(cam.defaultStream);
+      this.titleService.setTitle(`${cam.label} · scry`);
     } catch (e: any) {
       this.error.set(e?.message ?? 'Failed to load cameras');
     }

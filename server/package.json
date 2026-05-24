@@ -1,5 +1,5 @@
 {
-  "name": "tapo-viewer-server",
+  "name": "scry-server",
   "version": "0.1.0",
   "private": true,
   "type": "module",

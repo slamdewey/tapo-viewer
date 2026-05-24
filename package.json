@@ -1,5 +1,5 @@
 {
-  "name": "tapo-viewer",
+  "name": "scry",
   "private": true,
   "scripts": {
     "dev": "concurrently -n go2rtc,server,web -c green,cyan,magenta -k \"npm run dev:go2rtc\" \"npm --prefix server run dev\" \"npm --prefix web run start\"",

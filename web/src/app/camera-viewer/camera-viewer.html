@@ -10,12 +10,22 @@
       </div>
 
       @if (hasPtz()) {
-        <div class="overlay-ptz" [class.hidden]="!overlayVisible()">
+        <div
+          class="overlay-ptz"
+          [class.hidden]="!overlayVisible()"
+          (click)="$event.stopPropagation()"
+          (pointerdown)="$event.stopPropagation()"
+        >
           <app-ptz-pad [cameraId]="cam.id" />
         </div>
       }
 
-      <div class="overlay-controls" [class.hidden]="!overlayVisible()">
+      <div
+        class="overlay-controls"
+        [class.hidden]="!overlayVisible()"
+        (click)="$event.stopPropagation()"
+        (pointerdown)="$event.stopPropagation()"
+      >
         @if (hasMultipleQualities()) {
           <div class="control quality" [class.open]="qualityMenuOpen()">
             <button
