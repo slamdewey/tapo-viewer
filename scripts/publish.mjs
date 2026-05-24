@@ -15,7 +15,7 @@ const NPM = IS_WIN ? 'npm.cmd' : 'npm';
 
 let piHost = 'wormhole.local';
 let piUser = 'jared';
-let remoteDir = '/home/jared/tapo-viewer';
+let remoteDir = '/home/jared/scry';
 let skipBuild = false;
 
 const envPath = resolve(ROOT, 'deploy.env');
@@ -118,7 +118,7 @@ try {
   run('scp', [resolve(ROOT, 'models.yaml'), `${target}:${remoteDir}/models.yaml`]);
   run('scp', [tmpYaml, `${target}:${remoteDir}/go2rtc.yaml`]);
   run('scp', [
-    resolve(ROOT, 'scripts/tapo-server.service'),
+    resolve(ROOT, 'scripts/scry-server.service'),
     `${target}:${remoteDir}/scripts/`,
   ]);
   run('scp', [resolve(ROOT, 'scripts/go2rtc.service'), `${target}:${remoteDir}/scripts/`]);
@@ -136,7 +136,7 @@ try {
   run('ssh', ['-t', target, `bash ${remoteDir}/scripts/install-pi.sh`]);
 
   step('Restarting user services');
-  run('ssh', [target, 'systemctl --user restart go2rtc tapo-server']);
+  run('ssh', [target, 'systemctl --user restart go2rtc scry-server']);
 
   step(`Done. http://${piHost}:8080`);
 } finally {

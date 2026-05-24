@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "tapo-viewer-web": {
+    "scry-web": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -65,10 +65,10 @@
           },
           "configurations": {
             "production": {
-              "buildTarget": "tapo-viewer-web:build:production"
+              "buildTarget": "scry-web:build:production"
             },
             "development": {
-              "buildTarget": "tapo-viewer-web:build:development"
+              "buildTarget": "scry-web:build:development"
             }
           },
           "defaultConfiguration": "development"

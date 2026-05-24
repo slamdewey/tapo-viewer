@@ -27,7 +27,7 @@ interface RawCamerasFile {
 const FALLBACK_MODEL = 'generic';
 
 // Resolve paths relative to the server working directory's parent (the repo root).
-// In production, server runs from /home/jared/tapo-viewer/server, so ../cameras.yaml.
+// In production, server runs from /home/jared/scry/server, so ../cameras.yaml.
 // In dev, same shape (cwd=server when launched via npm scripts).
 const REPO_ROOT = resolve(process.cwd(), '..');
 const CAMERAS_PATH = resolve(REPO_ROOT, 'cameras.yaml');

@@ -3,7 +3,7 @@
 # when something actually changed.
 set -euo pipefail
 
-REMOTE_DIR="$HOME/tapo-viewer"
+REMOTE_DIR="$HOME/scry"
 GO2RTC_VERSION=v1.9.4
 
 case "$(uname -m)" in
@@ -12,6 +12,24 @@ case "$(uname -m)" in
   x86_64)  GO2RTC_ARCH=linux_amd64 ;;
   *) echo "Unsupported arch: $(uname -m)" >&2; exit 1 ;;
 esac
+
+# --- One-time migration from the old tapo-viewer layout -----------------------
+OLD_DIR="$HOME/tapo-viewer"
+OLD_UNIT="$HOME/.config/systemd/user/tapo-server.service"
+if [ -d "$OLD_DIR" ] && [ "$OLD_DIR" != "$REMOTE_DIR" ]; then
+  if [ -f "$OLD_DIR/server/.env" ] && [ ! -f "$REMOTE_DIR/server/.env" ]; then
+    echo "==> Migrating server/.env from $OLD_DIR to $REMOTE_DIR"
+    mkdir -p "$REMOTE_DIR/server"
+    cp "$OLD_DIR/server/.env" "$REMOTE_DIR/server/.env"
+  fi
+fi
+if [ -f "$OLD_UNIT" ]; then
+  echo "==> Removing legacy tapo-server.service user unit"
+  systemctl --user stop tapo-server 2>/dev/null || true
+  systemctl --user disable tapo-server 2>/dev/null || true
+  rm -f "$OLD_UNIT"
+  systemctl --user daemon-reload
+fi
 
 if ! command -v node >/dev/null 2>&1; then
   echo "==> Installing Node.js LTS"
@@ -93,7 +111,7 @@ fi
 USER_UNIT_DIR="$HOME/.config/systemd/user"
 mkdir -p "$USER_UNIT_DIR"
 UNITS_CHANGED=0
-for unit in go2rtc.service tapo-server.service; do
+for unit in go2rtc.service scry-server.service; do
   if ! cmp -s "$REMOTE_DIR/scripts/$unit" "$USER_UNIT_DIR/$unit" 2>/dev/null; then
     echo "==> Updating user unit $unit"
     cp "$REMOTE_DIR/scripts/$unit" "$USER_UNIT_DIR/$unit"
@@ -103,7 +121,7 @@ done
 if [ "$UNITS_CHANGED" = "1" ]; then
   systemctl --user daemon-reload
 fi
-systemctl --user enable go2rtc tapo-server >/dev/null 2>&1 || true
+systemctl --user enable go2rtc scry-server >/dev/null 2>&1 || true
 
 # --- Boot-time linger ---------------------------------------------------------
 if ! loginctl show-user "$USER" --property=Linger 2>/dev/null | grep -q "Linger=yes"; then

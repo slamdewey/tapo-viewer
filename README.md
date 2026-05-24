@@ -1,9 +1,10 @@
 # scry
 
-Self-hosted viewer for TP-Link Tapo IP cameras. A Raspberry Pi pulls RTSP from
-each camera, relays to WebRTC via [go2rtc](https://github.com/AlexxIT/go2rtc),
-and serves a small Angular web app for live viewing and PTZ. Remote access is
-via WireGuard.
+Self-hosted viewer for IP cameras — RTSP for streams, ONVIF for PTZ, anything
+that speaks both. A Raspberry Pi pulls RTSP from each camera, relays to WebRTC
+via [go2rtc](https://github.com/AlexxIT/go2rtc), and serves a small Angular
+web app for live viewing and PTZ. Remote access is via WireGuard. Tested with
+TP-Link Tapo C200.
 
 Built for a single household: a few cameras, a few devices, accessed on the
 LAN or while travelling.
@@ -12,7 +13,7 @@ LAN or while travelling.
 
 ```mermaid
 flowchart LR
-    cams[Tapo cameras]
+    cams[IP cameras]
     lan[LAN browser]
     peer[WG peer<br/>phone, laptop]
 
@@ -54,7 +55,7 @@ Two user-mode systemd services hold the app code:
 | Service        | Port(s)        | Role                                                 |
 | -------------- | -------------- | ---------------------------------------------------- |
 | `go2rtc`       | 1984, 8555/udp | RTSP→WebRTC relay, snapshot frames                   |
-| `tapo-server`  | 8080           | Static web bundle + `/api/cameras` + ONVIF PTZ proxy |
+| `scry-server` | 8080           | Static web bundle + `/api/cameras` + ONVIF PTZ proxy |
 
 Three system services support them, installed and configured by
 `scripts/install-pi.sh`:
@@ -95,7 +96,9 @@ tools/                Local dev helpers (dev-mode go2rtc config etc.)
 ## Prerequisites
 
 - A Raspberry Pi (or any Debian-ish Linux box) with SSH access.
-- Tapo cameras with RTSP enabled (Tapo app → camera settings → Camera Account).
+- An IP camera that exposes RTSP (for streaming) and ONVIF (for PTZ). On
+  Tapo cameras, RTSP is enabled in the Tapo app → camera settings → Camera
+  Account.
 - Node 20+ on your dev machine for builds.
 - A WireGuard server on the Pi (PiVPN is the easiest installer). Out of scope
   here.
@@ -112,7 +115,7 @@ cp cameras.example.yaml cameras.yaml         # then edit
 cp deploy.env.example deploy.env             # then edit
 npm install
 npm run deploy
-ssh wormhole.local 'bash ~/tapo-viewer/scripts/install-pi.sh'   # first time only
+ssh wormhole.local 'bash ~/scry/scripts/install-pi.sh'   # first time only
 ```
 
 Site is then at `http://scry` (LAN or VPN, once DNS is set up) or
@@ -209,7 +212,7 @@ new name, append another `address=/foo/<ip>` line, then:
 
 ```bash
 npm run deploy
-ssh wormhole 'bash ~/tapo-viewer/scripts/install-pi.sh'
+ssh wormhole 'bash ~/scry/scripts/install-pi.sh'
 ```
 
 The script copies the new conf into `/etc/dnsmasq.d/` and restarts dnsmasq.

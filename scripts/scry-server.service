@@ -1,12 +1,12 @@
 [Unit]
-Description=Tapo Viewer Node Server
+Description=scry server
 After=network-online.target go2rtc.service
 Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/jared/tapo-viewer/server
-EnvironmentFile=/home/jared/tapo-viewer/server/.env
+WorkingDirectory=/home/jared/scry/server
+EnvironmentFile=/home/jared/scry/server/.env
 ExecStart=/usr/bin/node dist/index.js
 Restart=on-failure
 RestartSec=3
