@@ -13,9 +13,10 @@ const ROOT = resolve(__dirname, '..');
 const IS_WIN = process.platform === 'win32';
 const NPM = IS_WIN ? 'npm.cmd' : 'npm';
 
-let piHost = 'wormhole.local';
-let piUser = 'jared';
-let remoteDir = '/home/jared/scry';
+// Generic defaults — override per-deployment in deploy.env (gitignored).
+let piHost = 'raspberrypi.local';
+let piUser = 'pi';
+let remoteDir = '~/scry';
 let skipBuild = false;
 
 const envPath = resolve(ROOT, 'deploy.env');

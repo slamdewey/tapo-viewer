@@ -68,10 +68,18 @@ fi
 DNSMASQ_SRC="$REMOTE_DIR/scripts/dnsmasq.scry.conf"
 DNSMASQ_DST=/etc/dnsmasq.d/scry.conf
 DNSMASQ_CHANGED=0
-if [ -f "$DNSMASQ_SRC" ] && ! sudo cmp -s "$DNSMASQ_SRC" "$DNSMASQ_DST" 2>/dev/null; then
-  echo "==> Updating $DNSMASQ_DST"
-  sudo cp "$DNSMASQ_SRC" "$DNSMASQ_DST"
-  DNSMASQ_CHANGED=1
+if [ -f "$DNSMASQ_SRC" ]; then
+  PI_IP=$(ip route get 1.1.1.1 2>/dev/null | grep -oP '(?<=src\s)\d+\.\d+\.\d+\.\d+' | head -1)
+  PI_HOSTNAME=$(hostname -s)
+  TMP_CONF=$(mktemp)
+  sed -e "s/__PI_IP__/$PI_IP/g" -e "s/__PI_HOSTNAME__/$PI_HOSTNAME/g" "$DNSMASQ_SRC" > "$TMP_CONF"
+  if ! sudo cmp -s "$TMP_CONF" "$DNSMASQ_DST" 2>/dev/null; then
+    echo "==> Updating $DNSMASQ_DST (host=$PI_HOSTNAME, ip=$PI_IP)"
+    sudo cp "$TMP_CONF" "$DNSMASQ_DST"
+    sudo chmod 644 "$DNSMASQ_DST"
+    DNSMASQ_CHANGED=1
+  fi
+  rm -f "$TMP_CONF"
 fi
 if ! systemctl is-enabled --quiet dnsmasq; then
   sudo systemctl enable dnsmasq >/dev/null

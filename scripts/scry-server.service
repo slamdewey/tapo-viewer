@@ -5,8 +5,8 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/jared/scry/server
-EnvironmentFile=/home/jared/scry/server/.env
+WorkingDirectory=%h/scry/server
+EnvironmentFile=%h/scry/server/.env
 ExecStart=/usr/bin/node dist/index.js
 Restart=on-failure
 RestartSec=3

@@ -5,8 +5,8 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/jared/scry
-ExecStart=/usr/local/bin/go2rtc -config /home/jared/scry/go2rtc.yaml
+WorkingDirectory=%h/scry
+ExecStart=/usr/local/bin/go2rtc -config %h/scry/go2rtc.yaml
 Restart=on-failure
 RestartSec=3
 
